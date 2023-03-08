@@ -1,9 +1,13 @@
+#if canImport(UIKit)
+
 import UIKit
+
 
 public extension VercelApi {
     /// Provides a convenience for downloading a `UIImage` from the user's information.
-    ///
-    ///  > Note: This function uses the following (undocumented) URL. It appears to be the same url that Vercel uses in their own frontend.`https://vercel.com/api/www/avatar/abcdefgh`
+    ///  > Note: This function uses the following (undocumented) URL. It appears to be the same url that Vercel uses in their own frontend. An example url is as follows:
+    ///  >
+    ///  >`https://vercel.com/api/www/avatar/abcdefgh`
     ///
     /// - Parameters:
     ///   - avatarHash: The SHA1 hash of the avatar for the User account. Can be found in the ``VercelKit/VAuthUser/avatar`` property on ``VercelKit/VAuthUser``
@@ -15,3 +19,7 @@ public extension VercelApi {
         return UIImage(data: data)
     }
 }
+
+
+#endif
+
