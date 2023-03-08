@@ -1,9 +1,7 @@
 import Foundation
 
 extension VercelApi {
-
-    
-    func getJSONData<D: Decodable>(
+    func _getJSONData<D: Decodable>(
         endpoint: String,
         model: D.Type,
         extraPrint: Bool = false

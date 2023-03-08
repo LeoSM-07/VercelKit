@@ -1,5 +1,6 @@
 import Foundation
 
+/// The unique data returned by the ``VercelKit/VercelApi/getUser()`` call
 public struct VAuthUserResponse: VercelData {
     public var user: VAuthUser
 
@@ -9,9 +10,9 @@ public struct VAuthUserResponse: VercelData {
 }
 
 public extension VercelApi {
-    /// Retrieve a list of the current User's authentication tokens.
+    /// Retrieve the data for the currently authenticated User.
     func getUser() async throws -> VAuthUser? {
-        try await getJSONData(
+        try await _getJSONData(
             endpoint: "/v2/user",
             model: VAuthUserResponse.self,
             extraPrint: false
