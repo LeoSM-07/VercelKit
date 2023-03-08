@@ -1,9 +1,10 @@
 import Foundation
 
+/// > Important: The ``VProject/Link-swift.struct`` struct has important postconditions. See it's individual documentation for more information.
 public struct VProject: VercelData, Identifiable {
     public var id: String
     public var accountId: String
-    public var analytics: VProjectAnalytics?
+    public var analytics: Analytics?
     public var autoExposeSystemEnvs: Bool?
     public var buildCommand: String?
     public var commandForIgnoringBuildStep: String?
@@ -12,11 +13,11 @@ public struct VProject: VercelData, Identifiable {
     public var devCommand: String?
     public var directoryListing: Bool
     public var installCommand: String?
-    public var env: [VProjectEnv]?
+    public var env: [Env]?
     public var framework: VProjectFramework?
     public var gitForkProtection: Bool?
-//  public var latestDeployments: ??
-//  public var link: ??
+    public var latestDeployments: [LatestDeployment]?
+    public var link: Link?
     public var name: String
     public var nodeVersion: VProjectNodeVersion
     public var outputDirectory: String?
@@ -28,78 +29,6 @@ public struct VProject: VercelData, Identifiable {
     public var updatedAt: Int?
     public var live: Bool?
     public var hasFloatingAliases: Bool?
-
-    public struct VProjectAnalytics: VercelData, Identifiable {
-        public var id: String
-        public var canceledAt: Int?
-        public var disabledAt: Int?
-        public var enabledAt: Int?
-        public var paidAt: Int?
-
-        enum CodingKeys: CodingKey {
-            case id, canceledAt, disabledAt, enabledAt, paidAt
-        }
-    }
-
-    public struct VProjectEnv: VercelData, Identifiable {
-        public var target: [EnvTarget]?
-        public var type: EnvType
-        public var id: String?
-        public var key: String
-        public var value: String
-        public var configurationId: String?
-        public var createdAt: Int?
-        public var updatedAt: Int?
-        public var createdBy: String?
-        public var updatedBy: String?
-        public var gitBranch: String?
-        public var edgeConfigId: String?
-        public var edgeConfigTokenId: String?
-        public var decrypted: Bool?
-
-        public enum EnvTarget: String, VercelData, CaseIterable {
-            case production = "production"
-            case preview = "preview"
-            case development = "development"
-        }
-
-        public enum EnvType: String, VercelData, CaseIterable {
-            case secret = "secret"
-            case system = "system"
-            case encrypted = "encrypted"
-            case plain = "plain"
-            case sensitive = "sensitive"
-        }
-
-        public enum CodingKeys: String, CodingKey {
-            case target, type, id, key, value, configurationId, createdAt, updatedAt, createdBy, updatedBy, gitBranch, edgeConfigId, edgeConfigTokenId, decrypted
-        }
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            if let targets = try container.decodeIfPresent([String].self, forKey: .target) {
-                self.target = targets.compactMap { EnvTarget(rawValue: $0) }
-            } else if let target = try container.decodeIfPresent(String.self, forKey: .target) {
-                self.target = [EnvTarget(rawValue: target)].compactMap { $0 }
-            } else {
-                self.target = nil
-            }
-            let type = try container.decode(String.self, forKey: .type)
-            self.type = EnvType(rawValue: type) ?? .secret
-            self.id = try container.decodeIfPresent(String.self, forKey: .id)
-            self.key = try container.decode(String.self, forKey: .key)
-            self.value = try container.decode(String.self, forKey: .value)
-            self.configurationId = try container.decodeIfPresent(String.self, forKey: .configurationId)
-            self.createdAt = try container.decodeIfPresent(Int.self, forKey: .createdAt)
-            self.updatedAt = try container.decodeIfPresent(Int.self, forKey: .updatedAt)
-            self.createdBy = try container.decodeIfPresent(String.self, forKey: .createdBy)
-            self.updatedBy = try container.decodeIfPresent(String.self, forKey: .updatedBy)
-            self.gitBranch = try container.decodeIfPresent(String.self, forKey: .gitBranch)
-            self.edgeConfigId = try container.decodeIfPresent(String.self, forKey: .edgeConfigId)
-            self.edgeConfigTokenId = try container.decodeIfPresent(String.self, forKey: .edgeConfigTokenId)
-            self.decrypted = try container.decodeIfPresent(Bool.self, forKey: .decrypted)
-        }
-    }
 
     public enum VProjectFramework: String, VercelData, CaseIterable {
         case blitzjs = "blitzjs"
@@ -153,7 +82,201 @@ public struct VProject: VercelData, Identifiable {
         case x10 = "10.x"
     }
 
-    enum CodingKeys: CodingKey {
-        case id, accountId, analytics, autoExposeSystemEnvs, buildCommand, commandForIgnoringBuildStep, connectConfigurationId, createdAt, devCommand, directoryListing, installCommand, env, framework, gitForkProtection, name, nodeVersion, outputDirectory, publicSource, rootDirectory, serverlessFunctionRegion, skipGitConnectDuringLink, sourceFilesOutsideRootDirectory, updatedAt, live, hasFloatingAliases
+    public struct Env: VercelData, Identifiable {
+        public var target: [EnvTarget]?
+        public var type: EnvType
+        public var id: String?
+        public var key: String
+        public var value: String
+        public var configurationId: String?
+        public var createdAt: Int?
+        public var updatedAt: Int?
+        public var createdBy: String?
+        public var updatedBy: String?
+        public var gitBranch: String?
+        public var edgeConfigId: String?
+        public var edgeConfigTokenId: String?
+        public var decrypted: Bool?
+
+        public enum EnvTarget: String, VercelData, CaseIterable {
+            case production = "production"
+            case preview = "preview"
+            case development = "development"
+        }
+
+        public enum EnvType: String, VercelData, CaseIterable {
+            case secret = "secret"
+            case system = "system"
+            case encrypted = "encrypted"
+            case plain = "plain"
+            case sensitive = "sensitive"
+        }
+
+        public enum CodingKeys: String, CodingKey {
+            case target, type, id, key, value, configurationId, createdAt, updatedAt, createdBy, updatedBy, gitBranch, edgeConfigId, edgeConfigTokenId, decrypted
+        }
+    }
+
+    public struct Analytics: VercelData, Identifiable {
+        public var id: String
+        public var canceledAt: Int?
+        public var disabledAt: Int?
+        public var enabledAt: Int?
+        public var paidAt: Int?
+
+        enum CodingKeys: CodingKey {
+            case id, canceledAt, disabledAt, enabledAt, paidAt
+        }
+    }
+
+    /// > Important: This type can come in several different forms. See the [official Vercel documentation](https://vercel.com/docs/rest-api#endpoints/projects/retrieve-a-list-of-projects) for more details on what types are actually optional.
+    public struct Link: VercelData {
+        /// Only appears when `type == .github`
+        public var org: String?
+        /// Only appears when `type == .github`
+        public var repo: String?
+        /// Only appears when `type == .github`
+        public var repoId: Int?
+        /// Appears in all types
+        public var type: LinkType
+        /// Appears in all types
+        public var createdAt: Int
+        /// Appears in all types
+        public var deployHooks: [DeployHook]
+        /// Appears in all types
+        public var gitCredentialId: String
+        /// Appears in all types
+        public var updatedAt: Int
+        /// Appears in all types
+        public var sourceless: Bool
+        /// Appears in all types
+        public var productionBranch: String
+        /// Only appears when `type == .gitlab`
+        public var projectId: String?
+        /// Only appears when `type == .gitlab`
+        public var projectName: String?
+        /// Only appears when `type == .gitlab`
+        public var projectNameWithNamespace: String?
+        /// Only appears when `type == .gitlab`
+        public var projectNamespace: String?
+        /// Only appears when `type == .gitlab`
+        public var projectUrl: String?
+        /// Only appears when `type == .bitbucket`
+        public var name: String?
+        /// Only appears when `type == .bitbucket`
+        public var slug: String?
+        /// Only appears when `type == .bitbucket`
+        public var owner: String?
+        /// Only appears when `type == .bitbucket`
+        public var uuid: String?
+        /// Only appears when `type == .bitbucket`
+        public var workspaceUuid: String?
+
+        public struct DeployHook: VercelData {
+            public var createdAt: Int
+            public var id: String
+            public var name: String
+            public var ref: String
+            public var url: String
+        }
+
+        public enum LinkType: String, VercelData, CaseIterable {
+            case github = "github"
+            case gitlab = "gitlab"
+            case bitbucket = "bitbucket"
+        }
+    }
+
+    public struct LatestDeployment: VercelData {
+        public var alias: [String]?
+        public var aliasAssigned: Int?
+        public var aliasError: AliasError?
+        public var builds: [Build]?
+        public var createdAt: Int
+        public var createdIn: String
+        public var creator: Creator
+        public var deploymentHostname: String
+        public var name: String
+        public var forced: Bool?
+        public var id: String
+        public var meta: [String: String]?
+        public var monorepoManager: String?
+        public var plan: Plan
+        public var `private`: Bool
+        public var readyState: ReadyState
+        public var requestedAt: Int?
+        public var target: String?
+        public var teamId: String?
+        public var type = "LAMBDAS"
+        public var url: String
+        public var userId: String
+        public var withCache: Bool?
+        public var checksConclusion: ChecksConclusion?
+        public var checksState: ChecksState?
+        public var readyAt: Int
+        public var buildingAt: Int
+        /** Whether or not preview comments are enabled for the deployment */
+        public var previewCommentsEnabled: Bool?
+
+        public struct AliasError: VercelData {
+            public var code: String
+            public var message: String
+
+            enum CodingKeys: CodingKey {
+                case code
+                case message
+            }
+        }
+
+        public struct Build: VercelData {
+            public var use: String
+            public var src: String?
+            public var dest: String?
+
+            enum CodingKeys: CodingKey {
+                case use
+                case src
+                case dest
+            }
+        }
+
+        public struct Creator: VercelData {
+            public var email: String
+            public var githubLogin: String?
+            public var gitlabLogin: String?
+            public var uid: String
+            public var username: String
+        }
+
+        public enum Plan: String, VercelData, CaseIterable {
+            case hobby = "hobby"
+            case enterprise = "enterprise"
+            case pro = "pro"
+            case oss = "oss"
+        }
+
+        public enum ReadyState: String, VercelData, CaseIterable {
+            case building = "BUILDING"
+            case error = "ERROR"
+            case initializing = "INITIALIZING"
+            case queued = "QUEUED"
+            case ready = "READY"
+            case canceled = "CANCELED"
+        }
+
+        public enum ChecksConclusion: String, VercelData, CaseIterable {
+            case succeeded = "succeeded"
+            case failed = "failed"
+            case skipped = "skipped"
+            case canceled = "canceled"
+        }
+
+        public enum ChecksState: String, VercelData, CaseIterable {
+            case registered = "registered"
+            case running = "running"
+            case completed = "completed"
+        }
+
+
     }
 }
